@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ImportDataSQL
-build_property.ProjectDir = C:\Users\Doanh\source\repos\ImportDataSQL\
+build_property.ProjectDir = /Users/user/Desktop/Code_Data/Dotnet/back_up_mssql_cshart_console/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

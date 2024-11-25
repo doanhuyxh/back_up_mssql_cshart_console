@@ -13,7 +13,7 @@ class Program
         string old_user = "sa";
         string old_pass = "B4o0wKMNRPMwbzOTNxpL";
         string old_port = "1433";
-        string backupDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "FileBackup" + $"{old_ip.Replace(".", "_")}" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+        string default_backupDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "FileBackup" + $"{old_ip.Replace(".", "_")}" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
 
         string new_ip;
         string new_user;
@@ -65,7 +65,11 @@ class Program
 
         Console.WriteLine("\n--------------------");
         Console.Write("Enter backup directory path: ");
-        backupDirectoryPath = Console.ReadLine() ?? backupDirectoryPath;
+        string backupDirectoryPath = Console.ReadLine()??"";
+
+        if (!string.IsNullOrEmpty(backupDirectoryPath)){
+            backupDirectoryPath = default_backupDirectoryPath;
+        }
         backupDirectoryPath = backupDirectoryPath.Trim();
 
         if (!Directory.Exists(backupDirectoryPath))
