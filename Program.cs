@@ -7,18 +7,20 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        
 
-        string old_ip = "103.245.236.208";
+
+        string old_ip = "127.0.0.1";
         string old_user = "sa";
-        string old_pass = "B4o0wKMNRPMwbzOTNxpL";
+        string old_pass = "01882904300Huy@";
         string old_port = "1433";
-        string default_backupDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "FileBackup" + $"{old_ip.Replace(".", "_")}" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+        string default_backupDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "FileBackup", $"{old_ip.Replace(".", "_")}" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+        string backupDirectoryPath = default_backupDirectoryPath;
 
-        string new_ip;
-        string new_user;
-        string new_pass;
-        string new_port;
+        string new_ip = string.Empty;
+        string new_user = string.Empty;
+        string new_pass = string.Empty;
+        string new_port = string.Empty;
+        string check_new_backup = string.Empty;
 
 
 
@@ -44,30 +46,11 @@ class Program
         old_pass = Console.ReadLine() ?? "";
         old_pass = old_pass.Trim();
 
-        Console.WriteLine("--------------------");
-        Console.WriteLine("Enter new connection details:");
-
-        Console.Write("Enter new ip: ");
-        new_ip = Console.ReadLine() ?? "";
-        new_ip = new_ip.Trim();
-
-        Console.Write("Enter new port: ");
-        new_port = Console.ReadLine() ?? "";
-        new_port = new_port.Trim();
-
-        Console.Write("Enter new user: ");
-        new_user = Console.ReadLine() ?? "";
-        new_user = new_user.Trim();
-
-        Console.Write("Enter new password: ");
-        new_pass = Console.ReadLine() ?? "";
-        new_pass = new_pass.Trim();
-
-        Console.WriteLine("\n--------------------");
         Console.Write("Enter backup directory path: ");
-        string backupDirectoryPath = Console.ReadLine()??"";
+        backupDirectoryPath = Console.ReadLine() ?? "";
 
-        if (!string.IsNullOrEmpty(backupDirectoryPath)){
+        if (string.IsNullOrEmpty(backupDirectoryPath))
+        {
             backupDirectoryPath = default_backupDirectoryPath;
         }
         backupDirectoryPath = backupDirectoryPath.Trim();
@@ -76,15 +59,44 @@ class Program
         {
             Directory.CreateDirectory(backupDirectoryPath);
         }
-
         Console.WriteLine("\n--------------------");
+        Console.WriteLine("Do you want to export databases to a new server? (y/n)");
+        check_new_backup = Console.ReadLine() ?? "";
+        check_new_backup = check_new_backup.Trim();
+        if (check_new_backup.ToLower() == "y")
+        {
+            Console.WriteLine("Enter new connection details:");
+
+            Console.Write("Enter new ip: ");
+            new_ip = Console.ReadLine() ?? "";
+            new_ip = new_ip.Trim();
+
+            Console.Write("Enter new port: ");
+            new_port = Console.ReadLine() ?? "";
+            new_port = new_port.Trim();
+
+            Console.Write("Enter new user: ");
+            new_user = Console.ReadLine() ?? "";
+            new_user = new_user.Trim();
+
+            Console.Write("Enter new password: ");
+            new_pass = Console.ReadLine() ?? "";
+            new_pass = new_pass.Trim();
+
+            Console.WriteLine("\n--------------------");
+        }
+
         Console.WriteLine("Exporting databases...");
         await ExportDatabases(backupDirectoryPath, old_ip, old_port, old_user, old_pass);
         Console.WriteLine("Export completed.");
-        Console.WriteLine("\n--------------------\n");
-        Console.WriteLine("Importing databases...");
-        //await CallImport(backupDirectoryPath, new_ip, new_port, new_user, new_pass);
-        Console.WriteLine("Import completed.");
+        if (check_new_backup.ToLower() == "y")
+        {
+            Console.WriteLine("\n--------------------\n");
+            Console.WriteLine("Importing databases...");
+            await CallImport(backupDirectoryPath, new_ip, new_port, new_user, new_pass);
+            Console.WriteLine("Import completed.");
+        }
+
     }
     private static async Task ExportDatabases(string backupDirectory, string ip, string port, string user, string pass)
     {
@@ -96,6 +108,21 @@ class Program
             var command = connection.CreateCommand();
             command.CommandText = "SELECT name FROM sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb')";
             var reader = await command.ExecuteReaderAsync();
+
+            if (!reader.HasRows)
+            {
+                Console.WriteLine("No database found");
+                return;
+            }
+            else
+            {
+                //show list database
+                while (await reader.ReadAsync())
+                {
+                    string databaseName = reader.GetString(0);
+                    Console.WriteLine(databaseName);
+                }
+            }
 
             while (await reader.ReadAsync())
             {
